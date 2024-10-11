@@ -1,21 +1,14 @@
-FROM node:22-alpine AS builder
+FROM nginx
 
-WORKDIR /usr/src/app
+# Cài đặt git
+RUN apt-get update && apt-get install -y git
 
-COPY package.json package-lock.json ./
+WORKDIR /usr/share/nginx/html
 
-RUN npm ci
+COPY nginx.conf /etc/nginx/nginx.conf
 
-COPY . .
+COPY dist/ .
 
-RUN npm run build
 
-# Use a lightweight web server to serve the production build
-FROM nginx:stable-alpine AS production
-
-COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
-
-# Expose the default port for the Nginx web server
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+# docker build . -t img-fe-hokkaido
+# docker run -d -p 3100:80 --name cons-fe-hokkaido img-fe-hokkaido 
